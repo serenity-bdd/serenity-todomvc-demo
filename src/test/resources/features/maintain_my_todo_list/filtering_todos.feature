@@ -9,7 +9,7 @@ Feature: Filtering todos
   @current
   Scenario Outline: Viewing the items by status
     Given that Jane has a todo list containing <tasks>
-    And she completes the task called "Walk the dog"
+    And she completes the task called "Walk the dogs"
     When she filters her list to show only <filter> tasks
     Then the current filter should be <filter>
     And her todo list should contain <expected>
