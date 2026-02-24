@@ -27,14 +27,14 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
 <!-- JQuery -->
-<script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script><!-- Required Stylesheets -->
+<script type="text/javascript" src="scripts/jquery-3.7.1.min.js"></script><!-- Required Stylesheets -->
 <link href="bootstrap-treeview/dist/bootstrap-treeview.min.css" rel="stylesheet">
 
 <!-- Required Javascript -->
 <script src="bootstrap-treeview/dist/bootstrap-treeview.min.js"></script><!-- DataTables -->
-<link type="text/css" href="datatables/1.13.1/datatables.min.css" rel="stylesheet" />
-<script type="text/javascript" src="datatables/1.13.1/datatables.min.js"></script>
-<script type="text/javascript" src="datatables/1.13.1/time-elapsed-dhms.js"></script>
+<link type="text/css" href="datatables/2.3.1/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/2.3.1/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/2.3.1/time-elapsed-dhms.js"></script>
 
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <script src="bootstrap/js/bootstrap.min.js"></script>
@@ -72,11 +72,11 @@
     Chart.register(ChartDataLabels);
 </script>
 <!-- JQuery-UI -->
-<link type="text/css" href="jqueryui/1.11.2-start/jquery-ui.min.css" rel="Stylesheet" />
-<script type="text/javascript" src="jqueryui/1.11.2-start/jquery-ui.min.js"></script><!-- DataTables -->
-<link type="text/css" href="datatables/1.13.1/datatables.min.css" rel="stylesheet" />
-<script type="text/javascript" src="datatables/1.13.1/datatables.min.js"></script>
-<script type="text/javascript" src="datatables/1.13.1/time-elapsed-dhms.js"></script>
+<link type="text/css" href="jquery-ui-1.14.1/jquery-ui.css" rel="Stylesheet" />
+<script type="text/javascript" src="jquery-ui-1.14.1/jquery-ui.js"></script><!-- DataTables -->
+<link type="text/css" href="datatables/2.3.1/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/2.3.1/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/2.3.1/time-elapsed-dhms.js"></script>
 
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <script src="bootstrap/js/bootstrap.min.js"></script>
@@ -108,14 +108,47 @@
     <script class="code" type="text/javascript">$(document).ready(function () {
 
 
+            $.fn.dataTable.ext.type.order['test-result-pre'] = function(data) {
+                // Extract the text from the hidden span (SUCCESS, FAILURE, etc.)
+                var match = data.match(/<span[^>]*style="display:none"[^>]*>(.*?)<\/span>/);
+                var result = match ? match[1].trim() : '';
+
+                // Define sort priority (failures first when ascending)
+                var order = {
+                    'FAILURE': 1,
+                    'ERROR': 2,
+                    'BROKEN': 3,
+                    'COMPROMISED': 4,
+                    'PENDING': 5,
+                    'IGNORED': 6,
+                    'SKIPPED': 7,
+                    'ABORTED': 8,
+                    'SUCCESS': 9
+                };
+
+                return order[result] || 99;
+            };
+
+            // Then modify your DataTable initialization
             $("#scenario-results").DataTable({
-                "order": [[0, "asc",], [3, "asc",]],
+                "order": [[0, "asc"], [1, "asc"], [2, "asc"]], // Keep your default sort order
                 "language": {
                     searchPlaceholder: "Filter",
                     search: ""
                 },
                 columnDefs: [
-                    {type: 'time-elapsed-dhms', targets: 4}
+                    {
+                        targets: 3, // Started column (Feature=0, Scenario=1, Steps=2, Started=3)
+                        visible: false
+                    },
+                    {
+                        type: 'time-elapsed-dhms',
+                        targets: 4 // Total Duration column
+                    },
+                    {
+                        type: 'test-result',
+                        targets: 5 // Result column
+                    }
                 ]
             })
             $("#manual-scenario-results").DataTable({
@@ -176,16 +209,13 @@
             <a href="capabilities.html"><i class="bi bi-journal-text"></i> Requirements</a>
         </li>
         <li >
-            <a href="dafb266f68444cb7f2451c923d70c1428ac45470c361842b818e6daa9bcd4fa8.html"><i class="bi bi-chat-text"></i> Themes</a>
-        </li>
-        <li >
             <a href="7ea0a5e2d679b9deeda9910ae4a9bcd3a281e0d908303a9e16e486103e98880c.html"><i class="bi bi-chat-text"></i> Capabilities</a>
         </li>
         <li >
             <a href="576946480b52ad056d6f5bddf874399c83582ecf90963cc074a14c70580e7d9f.html"><i class="bi bi-chat-text"></i> Features</a>
         </li>
     </ul>
-    <span class="date-and-time"><a href="build-info.html"><i class="bi bi-info-circle"></i></a> Report generated 03-12-2023 18:57:40</span>
+    <span class="date-and-time"><a href="build-info.html"><i class="bi bi-info-circle"></i></a> Report generated 24-02-2026 12:30:19</span>
     <br style="clear:left"/>
 </div>
     <div class="clr"></div>
@@ -201,14 +231,14 @@
                             <div class="test-count-summary">
                                 <div>
 
-                                    15 tests
+                                    1 test
 
                                      |
                                         <a href="e80959290e7a56e260eae4e478e213e65d2cf4b8ed07a445292ce199f838e983.csv" title="Download CSV"> <i class="bi bi-cloud-arrow-down" title="Download CSV"></i></a>
 
                                     <p class="report-info"><i class="bi bi-info-circle"></i> Note that results include
-                                        data-driven scenarios containing tests ,
-                                        which may also contain results other than tests .</p>
+                                        data-driven scenarios containing test ,
+                                        which may also contain results other than test .</p>
 
 
 
@@ -241,60 +271,60 @@
                     <td>
                         <i class="bi bi-card-checklist"></i> Number of Scenarios
                     </td>
-                    <td>11</td>
+                    <td>1</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-caret-right"></i> Total Number of Test Cases
                     </td>
-                    <td>15</td>
+                    <td>1</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-flag-fill"></i> Tests Started
                     </td>
-                    <td>Dec 03, 2023 18:56:07</td>
+                    <td>Feb 24, 2026 12:29:41</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-stop-circle"></i> Tests
                         Finished
                     </td>
-                    <td>Dec 03, 2023 18:57:27</td>
+                    <td>Feb 24, 2026 12:29:54</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-stopwatch"></i> Total
                         Duration
                     </td>
-                    <td> 1m 20s</td>
+                    <td>12s</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-trophy"></i> Fastest Test
                     </td>
-                    <td>10s</td>
+                    <td>12s</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-skip-start"></i> Slowest
                         Test
                     </td>
-                    <td>28s</td>
+                    <td>12s</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-stopwatch"></i> Average
                         Execution Time
                     </td>
-                    <td>15s</td>
+                    <td>12s</td>
                 </tr>
                 <tr scope="row">
                     <td>
-                        <i class="bi bi-stopwatch-fill"></i> Total
-                        Execution Time
+                        <i class="bi bi-stopwatch-fill"></i> Cumulative Test Time
+                        <br/><small class="text-muted">(sum of all individual test durations)</small>
                     </td>
-                    <td> 6m 17s</td>
+                    <td>12s</td>
                 </tr>
                 </tbody>
             </table>
@@ -337,34 +367,26 @@
                                                                 <div class="card">
                                                                     <div class="card-body">
                                                                         <div>
-                                                                                <a href="08fe31b4cedcca88014566e2926c79ff53b30818f68b6c102890ece9afcee9b3.html">
-                                                                                    <span class="badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                                                                        <i class="bi bi-tag"></i> Completing&nbsp;&nbsp;&nbsp;4
-                                                                                    </span>
-                                                                                </a>
-                                                                                <a href="1a067281f08658ac6c668d1f525eeada9cc5ed39ad7a4d652c30b2778694a272.html">
-                                                                                    <span class="badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                                                                        <i class="bi bi-tag"></i> Filtering&nbsp;&nbsp;&nbsp;7
-                                                                                    </span>
-                                                                                </a>
-                                                                                <a href="4ca851fa2ddf63c32d57d83cd86b601a6f80d04213a4e46be6833d0a655c243a.html">
-                                                                                    <span class="badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                                                                        <i class="bi bi-tag"></i> Current&nbsp;&nbsp;&nbsp;3
-                                                                                    </span>
-                                                                                </a>
-                                                                                <a href="d0e3033e1d4fd450bad910c731185f5c272a3350c68ca7cf2b9537e0aceae6af.html">
-                                                                                    <span class="badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                                                                        <i class="bi bi-tag"></i> Adding&nbsp;&nbsp;&nbsp;2
-                                                                                    </span>
-                                                                                </a>
-                                                                                <a href="028fb69bf25996e445f66d6323cf7c1d294bfbbb15ca870736473bd3facac897.html">
-                                                                                    <span class="badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                                                                        <i class="bi bi-tag"></i> Deleting&nbsp;&nbsp;&nbsp;2
-                                                                                    </span>
-                                                                                </a>
                                                                                 <a href="980553ab65ac3a80cb226527d564bcf09dfb50e9d5c6245f24578a314fb4b271.html">
                                                                                     <span class="badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                                                                        <i class="bi bi-tag"></i> Cucumber&nbsp;&nbsp;&nbsp;15
+                                                                                        <i class="bi bi-tag"></i> Cucumber&nbsp;&nbsp;&nbsp;1
+                                                                                    </span>
+                                                                                </a>
+                                                                                <a href="08fe31b4cedcca88014566e2926c79ff53b30818f68b6c102890ece9afcee9b3.html">
+                                                                                    <span class="badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                                                                        <i class="bi bi-tag"></i> Completing&nbsp;&nbsp;&nbsp;1
+                                                                                    </span>
+                                                                                </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="card">
+                                                                    <div class="card-body">
+                                                                            <h5 class="card-title">Context</h5>
+                                                                        <div>
+                                                                                <a href="46b54d9084ba9783130da16408afb27a4e4620f6bd966e731510c7395b9ddf5c.html">
+                                                                                    <span class="badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                                                                        <i class="bi bi-tag"></i> Chrome, Linux&nbsp;&nbsp;&nbsp;1
                                                                                     </span>
                                                                                 </a>
                                                                         </div>
@@ -396,10 +418,10 @@
                                                                         <tbody>
                                                                                 <tr>
                                                                                     <td>
-                                                                                            <a href="1c869f1cb7f49e6b8f132b638e5ca47f803bdfe1dddb3c2378d3b26928071e75.html" > Completing todos</a>
+                                                                                            <a href="a0bffd5a4237b8fd737f5dafc6c8cf7d3a78df290d07f6cf436eee53ebb6c65c.html" > Completing todos</a>
                                                                                     </td>
-                                                                                    <td>4</td>
-                                                                                    <td>4</td>
+                                                                                    <td>1</td>
+                                                                                    <td>1</td>
                                                                                     <td>100%</td>
                                                                                     <td>
                                                                                             <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
@@ -409,76 +431,7 @@
                                                                                                 <div class="progress-bar"
                                                                                                      role="progressbar"
                                                                                                      style="width: 100%; background-color: #b0cf73"
-                                                                                                     aria-valuenow="4"
-                                                                                                     title="100% success"
-                                                                                                     aria-valuemin="0"
-                                                                                                     aria-valuemax="100">
-                                                                                                </div>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <td>
-                                                                                            <a href="6ddbc1c8ce36bce0e259a3e89e7c9872cb23e76bedf7fdf94990cd7a1aa766f5.html" > Deleting todos</a>
-                                                                                    </td>
-                                                                                    <td>2</td>
-                                                                                    <td>2</td>
-                                                                                    <td>100%</td>
-                                                                                    <td>
-                                                                                            <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <div class="progress">
-                                                                                                <div class="progress-bar"
-                                                                                                     role="progressbar"
-                                                                                                     style="width: 100%; background-color: #b0cf73"
-                                                                                                     aria-valuenow="2"
-                                                                                                     title="100% success"
-                                                                                                     aria-valuemin="0"
-                                                                                                     aria-valuemax="100">
-                                                                                                </div>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <td>
-                                                                                            <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html" > Filtering todos</a>
-                                                                                    </td>
-                                                                                    <td>3</td>
-                                                                                    <td>7</td>
-                                                                                    <td>271%</td>
-                                                                                    <td>
-                                                                                            <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <div class="progress">
-                                                                                                <div class="progress-bar"
-                                                                                                     role="progressbar"
-                                                                                                     style="width: 100%; background-color: #b0cf73"
-                                                                                                     aria-valuenow="7"
-                                                                                                     title="100% success"
-                                                                                                     aria-valuemin="0"
-                                                                                                     aria-valuemax="100">
-                                                                                                </div>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <td>
-                                                                                            <a href="3a124d955f6ea793cf7bf05027df043f7ca1ea8564e2a627b156627da5c9a7af.html" > Add new todos</a>
-                                                                                    </td>
-                                                                                    <td>2</td>
-                                                                                    <td>2</td>
-                                                                                    <td>100%</td>
-                                                                                    <td>
-                                                                                            <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <div class="progress">
-                                                                                                <div class="progress-bar"
-                                                                                                     role="progressbar"
-                                                                                                     style="width: 100%; background-color: #b0cf73"
-                                                                                                     aria-valuenow="2"
+                                                                                                     aria-valuenow="1"
                                                                                                      title="100% success"
                                                                                                      aria-valuemin="0"
                                                                                                      aria-valuemax="100">
@@ -499,34 +452,26 @@
                     <div class="card">
                         <div class="card-body">
                             <div>
-                                    <a href="08fe31b4cedcca88014566e2926c79ff53b30818f68b6c102890ece9afcee9b3.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Completing&nbsp;&nbsp;&nbsp;4
-                                    </span>
-                                    </a>
-                                    <a href="1a067281f08658ac6c668d1f525eeada9cc5ed39ad7a4d652c30b2778694a272.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Filtering&nbsp;&nbsp;&nbsp;7
-                                    </span>
-                                    </a>
-                                    <a href="4ca851fa2ddf63c32d57d83cd86b601a6f80d04213a4e46be6833d0a655c243a.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Current&nbsp;&nbsp;&nbsp;3
-                                    </span>
-                                    </a>
-                                    <a href="d0e3033e1d4fd450bad910c731185f5c272a3350c68ca7cf2b9537e0aceae6af.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Adding&nbsp;&nbsp;&nbsp;2
-                                    </span>
-                                    </a>
-                                    <a href="028fb69bf25996e445f66d6323cf7c1d294bfbbb15ca870736473bd3facac897.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Deleting&nbsp;&nbsp;&nbsp;2
-                                    </span>
-                                    </a>
                                     <a href="980553ab65ac3a80cb226527d564bcf09dfb50e9d5c6245f24578a314fb4b271.html">
                                     <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Cucumber&nbsp;&nbsp;&nbsp;15
+                                        <i class="bi bi-tag-fill"></i> Cucumber&nbsp;&nbsp;&nbsp;1
+                                    </span>
+                                    </a>
+                                    <a href="08fe31b4cedcca88014566e2926c79ff53b30818f68b6c102890ece9afcee9b3.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Completing&nbsp;&nbsp;&nbsp;1
+                                    </span>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                                <h5 class="card-title">Context</h5>
+                            <div>
+                                    <a href="46b54d9084ba9783130da16408afb27a4e4620f6bd966e731510c7395b9ddf5c.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Chrome, Linux&nbsp;&nbsp;&nbsp;1
                                     </span>
                                     </a>
                             </div>
@@ -556,200 +501,14 @@
                                                 <tbody>
                                                         <tr class="scenario-result SUCCESS">
                                                             <td>
-                                                                    <a href="1c869f1cb7f49e6b8f132b638e5ca47f803bdfe1dddb3c2378d3b26928071e75.html">Completing todos</a>
+                                                                    <a href="a0bffd5a4237b8fd737f5dafc6c8cf7d3a78df290d07f6cf436eee53ebb6c65c.html">Completing todos</a>
                                                             </td>
-                                                            <td><a href="1895c14f6dcbc9e01255e223c690469b545414f832b3156628f24755b93761ae.html">Should be able to clear completed items</a>
-                                                            </td>
-                                                            <td>4</td>
-                                                            <td>18:56:07</td>
-                                                            <td>12s 332ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr class="scenario-result SUCCESS">
-                                                            <td>
-                                                                    <a href="1c869f1cb7f49e6b8f132b638e5ca47f803bdfe1dddb3c2378d3b26928071e75.html">Completing todos</a>
-                                                            </td>
-                                                            <td><a href="73f47eb9973b5416fcb8e752da524b45d0662ddff65d652a563115beec78f220.html">List of completed items should be empty if nothing has been completed</a>
-                                                            </td>
-                                                            <td>3</td>
-                                                            <td>18:56:22</td>
-                                                            <td>28s 747ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr class="scenario-result SUCCESS">
-                                                            <td>
-                                                                    <a href="1c869f1cb7f49e6b8f132b638e5ca47f803bdfe1dddb3c2378d3b26928071e75.html">Completing todos</a>
-                                                            </td>
-                                                            <td><a href="df1c6e72108c60877ce80faed7f72a38ba47b3908d4a50c2cb2287eea1e59deb.html">Completed tasks should be indicated as such</a>
+                                                            <td><a href="3d7b05f8a4a148b20daf287e5b3c3d081c2109e8f2edbd5966d8f5d5bd5daa66.html">Mark a task as completed</a>
                                                             </td>
                                                             <td>4</td>
-                                                            <td>18:56:51</td>
-                                                            <td>13s 448ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr class="scenario-result SUCCESS">
-                                                            <td>
-                                                                    <a href="1c869f1cb7f49e6b8f132b638e5ca47f803bdfe1dddb3c2378d3b26928071e75.html">Completing todos</a>
-                                                            </td>
-                                                            <td><a href="968288e3f6003e3222bf043c923e6b97220c68b72425ed521dafa79c59203eb8.html">Mark a task as completed</a>
-                                                            </td>
-                                                            <td>4</td>
-                                                            <td>18:57:04</td>
-                                                            <td>14s 884ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr class="scenario-result SUCCESS">
-                                                            <td>
-                                                                    <a href="6ddbc1c8ce36bce0e259a3e89e7c9872cb23e76bedf7fdf94990cd7a1aa766f5.html">Deleting todos</a>
-                                                            </td>
-                                                            <td><a href="35617e2f761c9962dd0dc905e4a730a107b55957faca24299dc0a301fe3cc673.html">Delete all the items</a>
-                                                            </td>
-                                                            <td>3</td>
-                                                            <td>18:56:07</td>
-                                                            <td>17s 523ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr class="scenario-result SUCCESS">
-                                                            <td>
-                                                                    <a href="6ddbc1c8ce36bce0e259a3e89e7c9872cb23e76bedf7fdf94990cd7a1aa766f5.html">Deleting todos</a>
-                                                            </td>
-                                                            <td><a href="0d102ed5fb56dea9e6608e636587cf22bd7b092331347fb37b913fb45e41cc29.html">Delete an active item</a>
-                                                            </td>
-                                                            <td>3</td>
-                                                            <td>18:56:26</td>
-                                                            <td>20s 825ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                            </td>
-                                                        </tr>
-                                                            <tr class="scenario-result SUCCESS">
-                                                                <td>
-                                                                        <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                                </td>
-                                                                <td>
-                                                                    <i class="bi bi-table" title="Data Driven Scenario"></i>
-                                                                    <a href="17fc70f3ddeb193c1ac0962e201c1d18e987810f9f4c455ccb6854ddd950fa6e.html">1: Displaying other filter status values </a>
-                                                                        <br/>filter=Active
-                                                                </td>
-                                                                <td>3</td>
-                                                                <td>18:56:48</td>
-                                                                <td>13s 833ms</td>
-                                                                <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                                </td>
-                                                            </tr>
-                                                            <tr class="scenario-result SUCCESS">
-                                                                <td>
-                                                                        <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                                </td>
-                                                                <td>
-                                                                    <i class="bi bi-table" title="Data Driven Scenario"></i>
-                                                                    <a href="17fc70f3ddeb193c1ac0962e201c1d18e987810f9f4c455ccb6854ddd950fa6e.html">2: Displaying other filter status values </a>
-                                                                        <br/>filter=Completed
-                                                                </td>
-                                                                <td>3</td>
-                                                                <td>18:56:26</td>
-                                                                <td>16s 545ms</td>
-                                                                <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                                </td>
-                                                            </tr>
-                                                            <tr class="scenario-result SUCCESS">
-                                                                <td>
-                                                                        <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                                </td>
-                                                                <td>
-                                                                    <i class="bi bi-table" title="Data Driven Scenario"></i>
-                                                                    <a href="17fc70f3ddeb193c1ac0962e201c1d18e987810f9f4c455ccb6854ddd950fa6e.html">3: Displaying other filter status values </a>
-                                                                        <br/>filter=All
-                                                                </td>
-                                                                <td>3</td>
-                                                                <td>18:56:07</td>
-                                                                <td>16s 033ms</td>
-                                                                <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                                </td>
-                                                            </tr>
-                                                        <tr class="scenario-result SUCCESS">
-                                                            <td>
-                                                                    <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                            </td>
-                                                            <td><a href="3c61eae3adc1f484ae16f49aef90615f44fa48136a9401a2a6526c43729d0238.html">The default filter should be Active</a>
-                                                            </td>
-                                                            <td>2</td>
-                                                            <td>18:57:04</td>
-                                                            <td>10s 118ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                            </td>
-                                                        </tr>
-                                                            <tr class="scenario-result SUCCESS">
-                                                                <td>
-                                                                        <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                                </td>
-                                                                <td>
-                                                                    <i class="bi bi-table" title="Data Driven Scenario"></i>
-                                                                    <a href="56fa11f5d55a0e6605827aa6f6efa5b74c2e96833c66160231abc02d77e16d94.html">1: Viewing the items by status </a>
-                                                                        <br/>tasks=Buy some milk, Walk the dog, filter=Active, expected=Buy some milk
-                                                                </td>
-                                                                <td>5</td>
-                                                                <td>18:57:16</td>
-                                                                <td>11s 412ms</td>
-                                                                <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                                </td>
-                                                            </tr>
-                                                            <tr class="scenario-result SUCCESS">
-                                                                <td>
-                                                                        <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                                </td>
-                                                                <td>
-                                                                    <i class="bi bi-table" title="Data Driven Scenario"></i>
-                                                                    <a href="56fa11f5d55a0e6605827aa6f6efa5b74c2e96833c66160231abc02d77e16d94.html">2: Viewing the items by status </a>
-                                                                        <br/>tasks=Buy some milk, Walk the dog, filter=Completed, expected=Walk the dog
-                                                                </td>
-                                                                <td>5</td>
-                                                                <td>18:57:19</td>
-                                                                <td>16s 910ms</td>
-                                                                <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                                </td>
-                                                            </tr>
-                                                            <tr class="scenario-result SUCCESS">
-                                                                <td>
-                                                                        <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                                </td>
-                                                                <td>
-                                                                    <i class="bi bi-table" title="Data Driven Scenario"></i>
-                                                                    <a href="56fa11f5d55a0e6605827aa6f6efa5b74c2e96833c66160231abc02d77e16d94.html">3: Viewing the items by status </a>
-                                                                        <br/>tasks=Buy some milk, Walk the dog, filter=All, expected=Buy some milk,  Walk the dog
-                                                                </td>
-                                                                <td>5</td>
-                                                                <td>18:57:04</td>
-                                                                <td>12s 815ms</td>
-                                                                <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                                </td>
-                                                            </tr>
-                                                        <tr class="scenario-result SUCCESS">
-                                                            <td>
-                                                                    <a href="3a124d955f6ea793cf7bf05027df043f7ca1ea8564e2a627b156627da5c9a7af.html">Add new todos</a>
-                                                            </td>
-                                                            <td><a href="1386bed419f5239bf7d4fae54ff26bbb6e4c697e6fec758271a0ccca5d8552b1.html">Adding an item to an empty list in Cucumber</a>
-                                                            </td>
-                                                            <td>3</td>
-                                                            <td>18:56:48</td>
-                                                            <td>11s 932ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
-                                                            </td>
-                                                        </tr>
-                                                        <tr class="scenario-result SUCCESS">
-                                                            <td>
-                                                                    <a href="3a124d955f6ea793cf7bf05027df043f7ca1ea8564e2a627b156627da5c9a7af.html">Add new todos</a>
-                                                            </td>
-                                                            <td><a href="14d296ce1956cc073a3cbd032f5883c35094feb063d408abbd986d71bda41437.html">Adding an item to a list with other items in Cucumber</a>
-                                                            </td>
-                                                            <td>3</td>
-                                                            <td>18:56:48</td>
-                                                            <td>14s 855ms</td>
-                                                            <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span style="display:none">SUCCESS</span>
+                                                            <td>12:29:41</td>
+                                                            <td>12s 772ms</td>
+                                                            <td class="test-result-cell"><span style="display:none">SUCCESS</span> <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
                                                             </td>
                                                         </tr>
                                                 </tbody>
@@ -774,34 +533,26 @@
                     <div class="card">
                         <div class="card-body">
                             <div>
-                                    <a href="08fe31b4cedcca88014566e2926c79ff53b30818f68b6c102890ece9afcee9b3.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Completing&nbsp;&nbsp;&nbsp;4
-                                    </span>
-                                    </a>
-                                    <a href="1a067281f08658ac6c668d1f525eeada9cc5ed39ad7a4d652c30b2778694a272.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Filtering&nbsp;&nbsp;&nbsp;7
-                                    </span>
-                                    </a>
-                                    <a href="4ca851fa2ddf63c32d57d83cd86b601a6f80d04213a4e46be6833d0a655c243a.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Current&nbsp;&nbsp;&nbsp;3
-                                    </span>
-                                    </a>
-                                    <a href="d0e3033e1d4fd450bad910c731185f5c272a3350c68ca7cf2b9537e0aceae6af.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Adding&nbsp;&nbsp;&nbsp;2
-                                    </span>
-                                    </a>
-                                    <a href="028fb69bf25996e445f66d6323cf7c1d294bfbbb15ca870736473bd3facac897.html">
-                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Deleting&nbsp;&nbsp;&nbsp;2
-                                    </span>
-                                    </a>
                                     <a href="980553ab65ac3a80cb226527d564bcf09dfb50e9d5c6245f24578a314fb4b271.html">
                                     <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
-                                        <i class="bi bi-tag-fill"></i> Cucumber&nbsp;&nbsp;&nbsp;15
+                                        <i class="bi bi-tag-fill"></i> Cucumber&nbsp;&nbsp;&nbsp;1
+                                    </span>
+                                    </a>
+                                    <a href="08fe31b4cedcca88014566e2926c79ff53b30818f68b6c102890ece9afcee9b3.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Completing&nbsp;&nbsp;&nbsp;1
+                                    </span>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                                <h5 class="card-title">Context</h5>
+                            <div>
+                                    <a href="46b54d9084ba9783130da16408afb27a4e4620f6bd966e731510c7395b9ddf5c.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Chrome, Linux&nbsp;&nbsp;&nbsp;1
                                     </span>
                                     </a>
                             </div>
@@ -827,7 +578,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12">
-            <span class="version">Serenity BDD version 4.0.28</span>
+            <span class="version">Serenity BDD version 5.3.0</span>
         </div>
     </div>
 </div>
@@ -855,7 +606,7 @@
             datasets: [{
                 label: 'Test Results',
                 fill: false,
-                data: [{meta: 'Passing tests', value: 15}, {meta: 'Pending tests', value: 0}, {meta: 'Ignored tests', value: 0}, {meta: 'Skipped tests', value: 0}, {meta: 'Aborted tests', value: 0}, {meta: 'Failing tests', value: 0}, {meta: 'Broken tests', value: 0}, {meta: 'Compromised tests', value: 0}],
+                data: [{meta: 'Passing tests', value: 1}, {meta: 'Pending tests', value: 0}, {meta: 'Ignored tests', value: 0}, {meta: 'Skipped tests', value: 0}, {meta: 'Aborted tests', value: 0}, {meta: 'Failing tests', value: 0}, {meta: 'Broken tests', value: 0}, {meta: 'Compromised tests', value: 0}],
                 backgroundColor: ['rgba(153,204,51,0.5)','rgba(165, 199, 238, 0.5)','rgba(168, 168, 168, 0.5)','rgba(238, 224, 152, 0.75)','rgba(255, 153, 102, 0.5)','rgba(255, 22, 49, 0.5)','rgba(255, 97, 8, 0.5)','rgba(255, 104, 255, 0.5)','rgba(83, 50, 168, 0.5)'],
                 borderColor: ['rgba(153,204,51,1)','rgba(165, 199, 238, 1)','rgba(168, 168, 168, 1)','rgba(238, 224, 152, 1)','rgba(255, 153, 102, 1)','rgba(255, 22, 49, 1)','rgba(255, 97, 8, 1)','rgba(255, 104, 255, 1)','rgba(83, 50, 168, 1)'],
                 borderWidth: 1,
@@ -951,7 +702,7 @@
             datasets: [
                 {
                     label: 'Automated',
-                    data: [15,0,0,0,0,0,0,0],
+                    data: [1,0,0,0,0,0,0,0],
                     backgroundColor: ['rgba(153,204,51,0.5)','rgba(165, 199, 238, 0.5)','rgba(168, 168, 168, 0.5)','rgba(238, 224, 152, 0.75)','rgba(255, 153, 102, 0.5)','rgba(255, 22, 49, 0.5)','rgba(255, 97, 8, 0.5)','rgba(255, 104, 255, 0.5)','rgba(83, 50, 168, 0.5)'],
                     borderColor: ['rgba(153,204,51,1)','rgba(165, 199, 238, 1)','rgba(168, 168, 168, 1)','rgba(238, 224, 152, 1)','rgba(255, 153, 102, 1)','rgba(255, 22, 49, 1)','rgba(255, 97, 8, 1)','rgba(255, 104, 255, 1)','rgba(83, 50, 168, 1)'],
                     borderWidth: 1
@@ -1034,7 +785,7 @@
             datasets: [{
                 label: 'Number of tests per duration',
                 fill: false,
-                data: ['0','0','15','0','0','0','0','0'],
+                data: ['0','0','1','0','0','0','0','0'],
                 backgroundColor: 'rgba(83, 146, 255,0.5)',
                 borderColor: 'rgba(83, 146, 255, 1)',
             }]
@@ -1099,22 +850,22 @@
             {
                 title: 'Completing todos',
                 result: 'SUCCESS',
-                link: "1c869f1cb7f49e6b8f132b638e5ca47f803bdfe1dddb3c2378d3b26928071e75.html"
+                link: "a0bffd5a4237b8fd737f5dafc6c8cf7d3a78df290d07f6cf436eee53ebb6c65c.html"
             },
             {
                 title: 'Deleting todos',
                 result: 'SUCCESS',
-                link: "6ddbc1c8ce36bce0e259a3e89e7c9872cb23e76bedf7fdf94990cd7a1aa766f5.html"
+                link: "b3d64db59a3442413444c325611fbdc6ec4a0383c25c17e8a2a8a80921bb2875.html"
             },
             {
                 title: 'Filtering todos',
                 result: 'SUCCESS',
-                link: "67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html"
+                link: "de02751737b844d322e900ff8b371cc73003a71a6597041b71528078ed1c61e8.html"
             },
             {
                 title: 'Add new todos',
                 result: 'SUCCESS',
-                link: "3a124d955f6ea793cf7bf05027df043f7ca1ea8564e2a627b156627da5c9a7af.html"
+                link: "dd4b85c728fd80c2af66a44e534521b721de9c6856f2f79a397a324b7bff82b3.html"
             },
         ]
         const coverageData = {
@@ -1127,7 +878,7 @@
             datasets: [
                 {
                     label: ['Passing Tests'],
-                    data: [4,2,7,2],
+                    data: [1,0,0,0],
                     backgroundColor: [ 'rgba(153,204,51,0.5)' ]
                 },
                 {

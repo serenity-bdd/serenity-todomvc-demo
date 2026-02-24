@@ -27,14 +27,14 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="stylesheet" href="bootstrap-icons/bootstrap-icons.css">
 <!-- JQuery -->
-<script type="text/javascript" src="scripts/jquery-1.11.1.min.js"></script><!-- Required Stylesheets -->
+<script type="text/javascript" src="scripts/jquery-3.7.1.min.js"></script><!-- Required Stylesheets -->
 <link href="bootstrap-treeview/dist/bootstrap-treeview.min.css" rel="stylesheet">
 
 <!-- Required Javascript -->
 <script src="bootstrap-treeview/dist/bootstrap-treeview.min.js"></script><!-- DataTables -->
-<link type="text/css" href="datatables/1.13.1/datatables.min.css" rel="stylesheet" />
-<script type="text/javascript" src="datatables/1.13.1/datatables.min.js"></script>
-<script type="text/javascript" src="datatables/1.13.1/time-elapsed-dhms.js"></script>
+<link type="text/css" href="datatables/2.3.1/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/2.3.1/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/2.3.1/time-elapsed-dhms.js"></script>
 
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <script src="bootstrap/js/bootstrap.min.js"></script>
@@ -72,11 +72,11 @@
     Chart.register(ChartDataLabels);
 </script>
 <!-- JQuery-UI -->
-<link type="text/css" href="jqueryui/1.11.2-start/jquery-ui.min.css" rel="Stylesheet" />
-<script type="text/javascript" src="jqueryui/1.11.2-start/jquery-ui.min.js"></script><!-- DataTables -->
-<link type="text/css" href="datatables/1.13.1/datatables.min.css" rel="stylesheet" />
-<script type="text/javascript" src="datatables/1.13.1/datatables.min.js"></script>
-<script type="text/javascript" src="datatables/1.13.1/time-elapsed-dhms.js"></script>
+<link type="text/css" href="jquery-ui-1.14.1/jquery-ui.css" rel="Stylesheet" />
+<script type="text/javascript" src="jquery-ui-1.14.1/jquery-ui.js"></script><!-- DataTables -->
+<link type="text/css" href="datatables/2.3.1/datatables.min.css" rel="stylesheet" />
+<script type="text/javascript" src="datatables/2.3.1/datatables.min.js"></script>
+<script type="text/javascript" src="datatables/2.3.1/time-elapsed-dhms.js"></script>
 
 <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
 <script src="bootstrap/js/bootstrap.min.js"></script>
@@ -108,14 +108,47 @@
 
     <script class="code" type="text/javascript">$(document).ready(function () {
 
+            $.fn.dataTable.ext.type.order['test-result-pre'] = function(data) {
+                // Extract the text from the hidden span (SUCCESS, FAILURE, etc.)
+                var match = data.match(/<span[^>]*style="display:none"[^>]*>(.*?)<\/span>/);
+                var result = match ? match[1].trim() : '';
+
+                // Define sort priority (failures first when ascending)
+                var order = {
+                    'FAILURE': 1,
+                    'ERROR': 2,
+                    'BROKEN': 3,
+                    'COMPROMISED': 4,
+                    'PENDING': 5,
+                    'IGNORED': 6,
+                    'SKIPPED': 7,
+                    'ABORTED': 8,
+                    'SUCCESS': 9
+                };
+
+                return order[result] || 99;
+            };
+
+            // Then modify your DataTable initialization
             $("#scenario-results").DataTable({
-                "order": [[0, "asc",], [1, "asc",], [2, "asc",]],
+                "order": [[0, "asc"], [1, "asc"], [2, "asc"]], // Keep your default sort order
                 "language": {
                     searchPlaceholder: "Filter",
                     search: ""
                 },
                 columnDefs: [
-                    {type: 'time-elapsed-dhms', targets: 5}
+                    {
+                        targets: 4, // Started column
+                        visible: false
+                    },
+                    {
+                        type: 'time-elapsed-dhms',
+                        targets: 5 // Total Duration column (adjusted from 6 to 5)
+                    },
+                    {
+                        type: 'test-result',
+                        targets: 6 // Result column (changed from 7 to 6)
+                    }
                 ]
             })
             $("#manual-scenario-results").DataTable({
@@ -124,6 +157,12 @@
                     searchPlaceholder: "Filter",
                     search: ""
                 },
+                columnDefs: [
+                    {
+                        targets: 4,
+                        visible: false
+                    },
+                ]
             })
 
             // Results table
@@ -139,10 +178,41 @@
                 info: false
             });
 
+            $.fn.dataTable.ext.type.order['test-result-pre'] = function(data) {
+                // Extract the result type from the title attribute in the icon
+                var match = data.match(/title=['"]([^'"]+)['"]/);
+                var result = match ? match[1].trim() : '';
+
+                // Define sort priority (failures first when ascending)
+                var order = {
+                    'FAILURE': 1,
+                    'ERROR': 2,
+                    'BROKEN': 3,
+                    'COMPROMISED': 4,
+                    'PENDING': 5,
+                    'IGNORED': 6,
+                    'SKIPPED': 7,
+                    'ABORTED': 8,
+                    'SUCCESS': 9
+                };
+
+                return order[result] || 99;
+            };
+
             $(".feature-coverage-table").DataTable({
                 searching: true,
                 paging: false,
-                info: false
+                info: false,
+                language: {
+                    searchPlaceholder: "Filter",
+                    search: ""
+                },
+                columnDefs: [
+                    {
+                        type: 'test-result',
+                        targets: 4  // Result column (5th column, index 4)
+                    }
+                ]
             });
 
             $(".feature-coverage-table-with-pagination").DataTable({
@@ -152,7 +222,7 @@
                 language: {
                     searchPlaceholder: "Filter",
                     search: ""
-                }
+                },
             });
         });
     </script>
@@ -197,16 +267,13 @@
             <a href="capabilities.html"><i class="bi bi-journal-text"></i> Requirements</a>
         </li>
         <li >
-            <a href="dafb266f68444cb7f2451c923d70c1428ac45470c361842b818e6daa9bcd4fa8.html"><i class="bi bi-chat-text"></i> Themes</a>
-        </li>
-        <li >
             <a href="7ea0a5e2d679b9deeda9910ae4a9bcd3a281e0d908303a9e16e486103e98880c.html"><i class="bi bi-chat-text"></i> Capabilities</a>
         </li>
         <li >
             <a href="576946480b52ad056d6f5bddf874399c83582ecf90963cc074a14c70580e7d9f.html"><i class="bi bi-chat-text"></i> Features</a>
         </li>
     </ul>
-    <span class="date-and-time"><a href="build-info.html"><i class="bi bi-info-circle"></i></a> Report generated 03-12-2023 18:57:39</span>
+    <span class="date-and-time"><a href="build-info.html"><i class="bi bi-info-circle"></i></a> Report generated 24-02-2026 12:30:18</span>
     <br style="clear:left"/>
 </div>
     <div class="clr"></div>
@@ -306,48 +373,48 @@
                     <td>
                         <i class="bi bi-flag-fill"></i> Tests Started
                     </td>
-                    <td>Dec 03, 2023 18:56:07</td>
+                    <td>Feb 24, 2026 12:30:02</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-stop-circle"></i> Tests
                         Finished
                     </td>
-                    <td>Dec 03, 2023 18:57:27</td>
+                    <td>Feb 24, 2026 12:30:11</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-stopwatch"></i> Total
                         Duration
                     </td>
-                    <td> 1m 20s</td>
+                    <td>9s</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-trophy"></i> Fastest Test
                     </td>
-                    <td>10s</td>
+                    <td>905ms</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-skip-start"></i> Slowest
                         Test
                     </td>
-                    <td>16s</td>
+                    <td>1s</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-stopwatch"></i> Average
                         Execution Time
                     </td>
-                    <td>13s</td>
+                    <td>1s</td>
                 </tr>
                 <tr scope="row">
                     <td>
-                        <i class="bi bi-stopwatch-fill"></i> Total
-                        Execution Time
+                        <i class="bi bi-stopwatch-fill"></i> Cumulative Test Time
+                        <br/><small class="text-muted">(sum of all individual test durations)</small>
                     </td>
-                    <td> 1m 27s</td>
+                    <td>8s</td>
                 </tr>
                 </tbody>
             </table>
@@ -364,8 +431,7 @@
 
                                                                     <h4>Features</h4>
 
-                                                                    <table class="table feature-coverage-table"
-                                                                           id="Feature">
+                                                                    <table class="table feature-coverage-table" id="Feature" style="width:100%">
                                                                         <thead>
                                                                         <tr>
                                                                             <th>Feature</th>
@@ -379,7 +445,7 @@
                                                                         <tbody>
                                                                                 <tr>
                                                                                     <td>
-                                                                                            <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html"> Filtering todos</a>
+                                                                                            <a href="de02751737b844d322e900ff8b371cc73003a71a6597041b71528078ed1c61e8.html"> Filtering todos</a>
                                                                                     </td>
                                                                                     <td>3</td>
                                                                                     <td>7</td>
@@ -431,6 +497,18 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-body">
+                                <h5 class="card-title">Context</h5>
+                            <div>
+                                    <a href="46b54d9084ba9783130da16408afb27a4e4620f6bd966e731510c7395b9ddf5c.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Chrome, Linux&nbsp;&nbsp;&nbsp;7
+                                    </span>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </div>
                                             </div>
@@ -453,7 +531,7 @@
                         <i class="bi bi-stopwatch"></i> Total
                         Duration
                     </td>
-                    <td> 1m 20s</td>
+                    <td>9s</td>
                 </tr>
                 <tr scope="row">
                     <td>
@@ -463,7 +541,7 @@
                     <td>
                         <i class="bi bi-trophy"></i> Fastest Test
                     </td>
-                    <td>10s</td>
+                    <td>905ms</td>
                 </tr>
                 <tr scope="row">
                     <td>
@@ -474,30 +552,30 @@
                         <i class="bi bi-skip-start"></i> Slowest
                         Test
                     </td>
-                    <td>16s</td>
+                    <td>1s</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-flag-fill"></i> Tests Started
                     </td>
-                    <td>Dec 03, 2023 18:56:07</td>
+                    <td>Feb 24, 2026 12:30:02</td>
                     <td>
                         <i class="bi bi-stopwatch"></i> Average
                         Execution Time
                     </td>
-                    <td>13s</td>
+                    <td>1s</td>
                 </tr>
                 <tr scope="row">
                     <td>
                         <i class="bi bi-stop-circle"></i> Tests
                         Finished
                     </td>
-                    <td>Dec 03, 2023 18:57:27</td>
+                    <td>Feb 24, 2026 12:30:11</td>
                     <td>
-                        <i class="bi bi-stopwatch-fill"></i> Total
-                        Execution Time
+                        <i class="bi bi-stopwatch-fill"></i> Cumulative Test Time
+                        <br/><small class="text-muted">(sum of all individual test durations)</small>
                     </td>
-                    <td> 1m 27s</td>
+                    <td>8s</td>
                 </tr>
                 </tbody>
             </table>
@@ -506,8 +584,7 @@
 
                                                         <h3><i class="bi bi-gear"></i> Automated Scenarios</h3>
 
-                                                            <table class="scenario-result-table table"
-                                                                   id="scenario-results">
+                                                            <table class="scenario-result-table table" id="scenario-results" style="width:100%">
                                                                 <thead>
                                                                 <tr>
                                                                     <th>feature</th>
@@ -522,60 +599,57 @@
                                                                 <tbody>
                                                                     <tr class="scenario-result SUCCESS">
                                                                         <td>
-                                                                                <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                                        </td>
-                                                                        <td data-order="Displaying other filter status values">
-                                                                            <i class="bi bi-table"
-                                                                               title="Data Driven Scenario"> <a
-                                                                                        href="17fc70f3ddeb193c1ac0962e201c1d18e987810f9f4c455ccb6854ddd950fa6e.html">Displaying other filter status values</a>
-                                                                                <br/>
-                                                                                    <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> 3 passing test cases
-                                                                                    <br/>
-                                                                        </td>
-                                                                        <td><span class='context-icon'><i class='bi bi-browser-edge' title='Microsoft Edge'></i></span><span style="display:none">Microsoft Edge</span>
-                                                                        </td>
-                                                                        <td>2</td>
-                                                                        <td data-order="1701629767">18:56:07</td>
-                                                                        <td>54s 557ms</td>
-                                                                        <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span
-                                                                                    style="display:none">SUCCESS</span>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr class="scenario-result SUCCESS">
-                                                                        <td>
-                                                                                <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
-                                                                        </td>
-                                                                        <td data-order="The default filter should be Active">
-                                                                                    <a href="3c61eae3adc1f484ae16f49aef90615f44fa48136a9401a2a6526c43729d0238.html">The default filter should be Active</a>
-                                                                        </td>
-                                                                        <td><span class='context-icon'><i class='bi bi-browser-edge' title='Microsoft Edge'></i></span><span style="display:none">Microsoft Edge</span>
-                                                                        </td>
-                                                                        <td>2</td>
-                                                                        <td data-order="1701629824">18:57:04</td>
-                                                                        <td>10s 118ms</td>
-                                                                        <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span
-                                                                                    style="display:none">SUCCESS</span>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr class="scenario-result SUCCESS">
-                                                                        <td>
-                                                                                <a href="67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html">Filtering todos</a>
+                                                                                <a href="de02751737b844d322e900ff8b371cc73003a71a6597041b71528078ed1c61e8.html">Filtering todos</a>
                                                                         </td>
                                                                         <td data-order="Viewing the items by status">
                                                                             <i class="bi bi-table"
                                                                                title="Data Driven Scenario"> <a
-                                                                                        href="56fa11f5d55a0e6605827aa6f6efa5b74c2e96833c66160231abc02d77e16d94.html">Viewing the items by status</a>
+                                                                                        href="94a4eb2b621eb6e5452b2174bb5737848cd054a4877bf531fac9a880731fc177.html">Viewing the items by status</a>
                                                                                 <br/>
                                                                                     <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> 3 passing test cases
                                                                                     <br/>
                                                                         </td>
-                                                                        <td><span class='context-icon'><i class='bi bi-browser-edge' title='Microsoft Edge'></i></span><span style="display:none">Microsoft Edge</span>
+                                                                        <td><span class='context-icon'><i class='bi bi-browser-chrome' title='Chrome'></i> <i class='bi bi-ubuntu' title='Linux'></i></span><span style="display:none">Chrome,linux</span>
                                                                         </td>
                                                                         <td>5</td>
-                                                                        <td data-order="1701629824">18:57:04</td>
-                                                                        <td>23s 137ms</td>
-                                                                        <td><a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> <span
-                                                                                    style="display:none">SUCCESS</span>
+                                                                        <td data-order="1771936202">12:30:02</td>
+                                                                        <td>4s 755ms</td>
+                                                                        <td class="test-result-cell"><span style="display:none">SUCCESS</span> <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr class="scenario-result SUCCESS">
+                                                                        <td>
+                                                                                <a href="de02751737b844d322e900ff8b371cc73003a71a6597041b71528078ed1c61e8.html">Filtering todos</a>
+                                                                        </td>
+                                                                        <td data-order="The default filter should be Active">
+                                                                                    <a href="76cdf9907c19544db76bf9849b2b155198f5ed2264c544f85d125b2a8650f32b.html">The default filter should be Active</a>
+                                                                        </td>
+                                                                        <td><span class='context-icon'><i class='bi bi-browser-chrome' title='Chrome'></i> <i class='bi bi-ubuntu' title='Linux'></i></span><span style="display:none">Chrome,linux</span>
+                                                                        </td>
+                                                                        <td>2</td>
+                                                                        <td data-order="1771936207">12:30:07</td>
+                                                                        <td>905ms</td>
+                                                                        <td class="test-result-cell"><span style="display:none">SUCCESS</span> <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr class="scenario-result SUCCESS">
+                                                                        <td>
+                                                                                <a href="de02751737b844d322e900ff8b371cc73003a71a6597041b71528078ed1c61e8.html">Filtering todos</a>
+                                                                        </td>
+                                                                        <td data-order="Displaying other filter status values">
+                                                                            <i class="bi bi-table"
+                                                                               title="Data Driven Scenario"> <a
+                                                                                        href="3e45247b1003b5e01d9a177ac1db4ba64980834a726fe585497753135cf3f563.html">Displaying other filter status values</a>
+                                                                                <br/>
+                                                                                    <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a> 3 passing test cases
+                                                                                    <br/>
+                                                                        </td>
+                                                                        <td><span class='context-icon'><i class='bi bi-browser-chrome' title='Chrome'></i> <i class='bi bi-ubuntu' title='Linux'></i></span><span style="display:none">Chrome,linux</span>
+                                                                        </td>
+                                                                        <td>2</td>
+                                                                        <td data-order="1771936208">12:30:08</td>
+                                                                        <td>3s 333ms</td>
+                                                                        <td class="test-result-cell"><span style="display:none">SUCCESS</span> <a href='##beforetable'><i class='bi bi-check-circle-fill success-icon ' title='SUCCESS'></i></a>
                                                                         </td>
                                                                     </tr>
                                                                 </tbody>
@@ -618,6 +692,18 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-body">
+                                <h5 class="card-title">Context</h5>
+                            <div>
+                                    <a href="46b54d9084ba9783130da16408afb27a4e4620f6bd966e731510c7395b9ddf5c.html">
+                                    <span class="tag-badge badge" style="background-color:#b0cf73; margin:1em;padding:4px;">
+                                        <i class="bi bi-tag-fill"></i> Chrome, Linux&nbsp;&nbsp;&nbsp;7
+                                    </span>
+                                    </a>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </div>
                                             </div>
@@ -638,7 +724,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12">
-            <span class="version">Serenity BDD version 4.0.28</span>
+            <span class="version">Serenity BDD version 5.3.0</span>
         </div>
     </div>
 </div>
@@ -845,7 +931,7 @@
             datasets: [{
                 label: 'Number of tests per duration',
                 fill: false,
-                data: ['0','0','7','0','0','0','0','0'],
+                data: ['1','6','0','0','0','0','0','0'],
                 backgroundColor: 'rgba(83, 146, 255,0.5)',
                 borderColor: 'rgba(83, 146, 255, 1)',
             }]
@@ -910,30 +996,30 @@
             {
                 title: 'Filtering todos',
                 result: 'SUCCESS',
-                link: "67c75c26feb0e5dba81de5826711ca08718d7f4a8becde9a2dc501fe8c92f070.html"
-            },
-            {
-                title: 'Add new todos',
-                result: 'SUCCESS',
-                link: "3a124d955f6ea793cf7bf05027df043f7ca1ea8564e2a627b156627da5c9a7af.html"
-            },
-            {
-                title: 'Completing todos',
-                result: 'SUCCESS',
-                link: "1c869f1cb7f49e6b8f132b638e5ca47f803bdfe1dddb3c2378d3b26928071e75.html"
+                link: "de02751737b844d322e900ff8b371cc73003a71a6597041b71528078ed1c61e8.html"
             },
             {
                 title: 'Deleting todos',
                 result: 'SUCCESS',
-                link: "6ddbc1c8ce36bce0e259a3e89e7c9872cb23e76bedf7fdf94990cd7a1aa766f5.html"
+                link: "b3d64db59a3442413444c325611fbdc6ec4a0383c25c17e8a2a8a80921bb2875.html"
+            },
+            {
+                title: 'Completing todos',
+                result: 'SUCCESS',
+                link: "a0bffd5a4237b8fd737f5dafc6c8cf7d3a78df290d07f6cf436eee53ebb6c65c.html"
+            },
+            {
+                title: 'Add new todos',
+                result: 'SUCCESS',
+                link: "dd4b85c728fd80c2af66a44e534521b721de9c6856f2f79a397a324b7bff82b3.html"
             },
         ]
         const coverageData = {
             labels: [
                 'Filtering todos',
-                'Add new todos',
-                'Completing todos',
                 'Deleting todos',
+                'Completing todos',
+                'Add new todos',
             ],
             datasets: [
                 {
